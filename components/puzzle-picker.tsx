@@ -143,7 +143,9 @@ export function PuzzlePicker({
                     (a, b) =>
                       DIFFICULTY_ORDER.indexOf(a.difficulty) -
                         DIFFICULTY_ORDER.indexOf(b.difficulty) ||
-                      a.id.localeCompare(b.id),
+                      a.volume - b.volume ||
+                      a.book - b.book ||
+                      a.puzzleNumber - b.puzzleNumber,
                   )
                   .map((p) => {
                     const isActive = p.id === currentId;

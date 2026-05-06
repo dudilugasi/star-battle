@@ -21,6 +21,9 @@ export interface Puzzle {
   regions: number[][];
   /** Optional canonical solution: `solution[r][c] === true` means a star goes there. */
   solution?: boolean[][];
+  volume: number;
+  book: number;
+  puzzleNumber: number;
 }
 
 export interface GameSnapshot {
