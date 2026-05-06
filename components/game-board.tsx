@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { Cell } from "./cell";
 import { CellValue, Puzzle, cellKey } from "@/lib/types";
 import { computeBorders } from "@/lib/regions";
+import { useDragPaint } from "@/hooks/use-drag-paint";
 
 interface GameBoardProps {
   puzzle: Puzzle;
@@ -11,6 +12,12 @@ interface GameBoardProps {
   conflicts: Set<string>;
   disabled: boolean;
   onCellClick: (r: number, c: number) => void;
+  /**
+   * Drag-paint dispatcher from `useGame`. Called once with `commit: true`
+   * at the start of a drag and then `commit: false` for each additional
+   * empty cell crossed, so the whole gesture is a single undo step.
+   */
+  paintCell: (r: number, c: number, opts: { commit: boolean }) => void;
 }
 
 export function GameBoard({
@@ -19,9 +26,14 @@ export function GameBoard({
   conflicts,
   disabled,
   onCellClick,
+  paintCell,
 }: GameBoardProps) {
   // Borders only depend on the region map, not the play state — memoize.
   const borders = useMemo(() => computeBorders(puzzle), [puzzle]);
+
+  // Drag-paint owns the global pointermove/pointerup listeners and exposes
+  // a single onPointerDown that each cell forwards.
+  const { onPointerDown } = useDragPaint({ board, paintCell, disabled });
 
   return (
     <div
@@ -45,6 +57,7 @@ export function GameBoard({
             conflict={conflicts.has(cellKey(r, c))}
             disabled={disabled}
             onClick={onCellClick}
+            onPointerDown={onPointerDown}
           />
         )),
       )}

@@ -54,6 +54,7 @@ function GameSurface({ puzzleId }: { puzzleId: string }) {
         conflicts={game.conflicts}
         disabled={game.state.status === "solved"}
         onCellClick={game.cycleCell}
+        paintCell={game.paintCell}
       />
       <WinOverlay
         show={game.state.status === "solved"}

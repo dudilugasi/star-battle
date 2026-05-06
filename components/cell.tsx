@@ -1,6 +1,7 @@
 "use client";
 
 import { memo, useEffect, useState } from "react";
+import type { PointerEvent as ReactPointerEvent } from "react";
 import { CellValue, cellKey } from "@/lib/types";
 import { CellBorders, regionTint } from "@/lib/regions";
 
@@ -17,6 +18,17 @@ interface CellProps {
   conflict: boolean;
   disabled: boolean;
   onClick: (r: number, c: number) => void;
+  /**
+   * Pointer-down hook from `useDragPaint`. Starts a paint drag on empty
+   * cells; on x / star it's a no-op so the normal click → cycle still
+   * runs on pointerup.
+   */
+  onPointerDown: (
+    r: number,
+    c: number,
+    value: CellValue,
+    e: ReactPointerEvent<HTMLElement>,
+  ) => void;
 }
 
 // One cell of the board. Borders are conditional Tailwind classes — thick
@@ -31,6 +43,7 @@ function CellImpl({
   conflict,
   disabled,
   onClick,
+  onPointerDown,
 }: CellProps) {
   const tint = regionTint(region);
 
@@ -77,11 +90,14 @@ function CellImpl({
     <button
       type="button"
       onClick={() => onClick(r, c)}
+      onPointerDown={(e) => onPointerDown(r, c, value, e)}
       disabled={disabled}
       aria-label={`Cell ${r + 1}, ${c + 1}: ${value}`}
       data-cell={cellKey(r, c)}
+      // `touch-none` (touch-action: none) keeps the browser from claiming
+      // touch drags as page scrolls, so our paint gesture gets the events.
       className={[
-        "relative aspect-square w-full select-none transition-colors overflow-hidden",
+        "relative aspect-square w-full select-none touch-none transition-colors overflow-hidden",
         "flex items-center justify-center",
         "text-2xl sm:text-3xl font-bold",
         tint,
